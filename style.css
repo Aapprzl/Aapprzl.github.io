@@ -1,8 +1,16 @@
 .jumbotron {
-  padding-top: 7rem;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
   background-color: #f0f8ff;
 }
 
 section {
   padding-top: 3rem;
 }
+
+
+
+/* .carousel-inner > .carousel-item > img {
+  height: 100vh;
+} */
+
