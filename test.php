@@ -1,0 +1,6 @@
+<?php
+
+mysqli_connect();
+
+
+?>
