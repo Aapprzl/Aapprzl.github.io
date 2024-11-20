@@ -14,3 +14,17 @@ section {
   height: 100vh;
 } */
 
+  .ExternalFiles {
+    position: relative;
+    width: 100%; /* Mengambil lebar penuh container */
+    padding-top: 75%; /* Rasio aspek 4:3, sesuaikan jika perlu */
+  }
+
+  .ExternalFiles iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
