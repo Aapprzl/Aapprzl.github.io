@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artikel dengan Tampilan Full dan Scrollable</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+
+    <style>
+        body, html {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            overflow-x: hidden;
+        }
+    
+        h1 {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+    
+       /* Mengatur tinggi minimum pada setiap card agar seragam */
+    .article {
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        flex: 0 0 calc(33.333% - 10px); /* Ukuran card 33.333% dari lebar kontainer, minus jarak */
+        flex-direction: column;
+        height: 100%; /* Menjamin card mengambil 100% tinggi ruangnya */
+        min-height: 350px; /* Menentukan tinggi minimum */
+        box-sizing: border-box; /* Agar padding tidak menambah tinggi */
+    }
+    
+        .article h2 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+    
+        p {
+            text-align: justify;
+            line-height: 1.8;
+        }
+    
+        .btn-primary {
+            display: block;
+            margin: 20px auto;
+            width: fit-content;
+        }
+    
+        .btn-primary:focus {
+            outline: none;
+        }
+    
+        /* Agar konten dalam card tidak meluber keluar */
+        .content-preview {
+            max-height: 120px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+    
+        .content-full {
+            display: block;
+        }
+    
+        #expandedArticle {
+            width: 100%;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+    
+        .expanded .content-preview {
+            max-height: none;
+        }
+    
+        /* Responsif untuk ukuran layar kecil */
+        @media (max-width: 768px) {
+            #articlePage {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+    
+            .article {
+                padding: 15px;
+            }
+        }
+    
+        @media (max-width: 576px) {
+            #articlePage {
+                grid-template-columns: 1fr;
+            }
+    
+            .article {
+                padding: 10px;
+            }
+        }
+    
+            /* Menyusun artikel dalam baris jika lebih dari satu */
+        #scrollableCards {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 20px 0;
+            flex-wrap: wrap; /* Membuat card bisa 'wrap' ke bawah jika sudah penuh */
+        }
+    
+        #scrollableCards .article {
+            flex: 1 0 250px; /* Card bisa mengambil lebar minimum 250px */
+            margin-bottom: 20px; /* Memberi jarak antar card */
+            height: 100%; /* Menjamin card mengambil tinggi penuh */
+        }
+            
+                /* Untuk layout setelah read more */
+                .full-article {
+                    margin-bottom: 20px;
+                }
+    </style>
+    
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Halaman Artikel</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index1.html">HOME</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/article.html">Lihat Artikel</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1>Artikel</h1>
+        <div id="articlePage">
+
+            <!-- Div untuk menampilkan artikel yang diperbesar (full view) jika ada interaksi -->
+            <div id="expandedArticle" style="margin-bottom: 20px;"></div>
+            <!-- Div untuk menampilkan artikel-artikel dalam bentuk scrollable horizontal -->
+            <div id="scrollableCards" style="display: flex; overflow-x: auto; padding: 10px;"></div>
+
+        </div>        
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Ambil artikel dari localStorage
+        let articles = JSON.parse(localStorage.getItem('articles')) || [];
+    
+        const expandedArticleDiv = document.getElementById('expandedArticle');
+        const scrollableCardsDiv = document.getElementById('scrollableCards');
+    
+        function formatContent(content) {
+            if (!content) return '';
+            const paragraphs = content.split(/\n\s*\n/);
+            return paragraphs.map(paragraph => `<p>${paragraph.trim()}</p>`).join('');
+        }
+    
+        function displayArticles() {
+            // Kosongkan artikel yang ada sebelumnya di scrollableCardsDiv
+            scrollableCardsDiv.innerHTML = '';
+    
+            // Menampilkan artikel-artikel dalam scrollable horizontal (termasuk artikel pertama)
+            articles.forEach((article, index) => {
+                scrollableCardsDiv.innerHTML += `
+                    <div class="article" id="article-${index}">
+                        <h2>${article.title}</h2>
+                        <div class="content-preview">${formatContent(article.content)}</div>
+                        <div class="read-more-btn">
+                            <button class="btn btn-primary" onclick="toggleArticle(this, ${index})">Read More</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    
+        function toggleArticle(button, articleIndex) {
+            const articleDiv = document.getElementById(`article-${articleIndex}`);
+    
+            // Jika artikel dalam keadaan expanded
+            if (articleDiv.classList.contains('expanded')) {
+                // Kembalikan artikel ke grid horizontal
+                articleDiv.classList.remove('expanded');
+                button.textContent = 'Read More';
+    
+                // Pindahkan artikel kembali ke dalam scrollable grid
+                scrollableCardsDiv.appendChild(articleDiv);
+            } else {
+                // Jika artikel belum diperbesar, hapus kelas 'expanded' dari artikel lain
+                const otherArticles = document.querySelectorAll('.article');
+                otherArticles.forEach(article => {
+                    if (article !== articleDiv) {
+                        article.classList.remove('expanded');
+                        const btn = article.querySelector('button');
+                        if (btn) btn.textContent = 'Read More';
+                        // Pindahkan artikel yang lain kembali ke scrollable grid
+                        scrollableCardsDiv.appendChild(article);
+                    }
+                });
+    
+                // Menambahkan kelas expanded ke artikel yang dipilih dan ubah teks tombol
+                articleDiv.classList.add('expanded');
+                button.textContent = 'Read Less';
+    
+                // Pindahkan artikel yang dipilih ke atas
+                expandedArticleDiv.insertBefore(articleDiv, expandedArticleDiv.firstChild); // Memastikan artikel dipindah ke atas
+    
+                // Scroll otomatis ke atas untuk menampilkan artikel yang diperbesar
+                articleDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    
+        // Render artikel saat halaman dimuat
+        displayArticles();
+    </script>
+    
+    
+    
+    
+</body>
+</html>
